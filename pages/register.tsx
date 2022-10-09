@@ -1,7 +1,9 @@
 import { Button, Input } from "@mantine/core";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { IconAt, IconLogin, IconAsterisk } from "@tabler/icons";
+import { gql, useMutation, useQuery } from "urql";
+import { MUTATION_REGISTER } from "./graphql/mutations/register";
 
 interface registerProps {}
 
@@ -12,13 +14,25 @@ function Register({}) {
     formState: { errors },
   } = useForm();
 
+  const [inputData, setInputData] = useState({ username: "null", password: "null" });
+
+  const [, executeMutation] = useMutation(MUTATION_REGISTER);
+  const setRequestValues = (data: any) => {
+    setInputData(data);
+  };
+
+  useEffect(() => {
+    executeMutation({ username: inputData.username, password: inputData.password });
+  }, [inputData]);
+
   return (
     <form
       className="flex flex-col w-screen h-screen justify-center items-center bg-gray-200"
-      onSubmit={handleSubmit((data) => console.log(data))}
+      onSubmit={handleSubmit(setRequestValues)}
     >
       <div className="flex flex-col justify-center items-center gap-2 backdrop-blur-sm bg-white/70 py-8 px-12 rounded-lg shadow-md ">
         <Input
+          className="smallIcon"
           icon={<IconLogin />}
           placeholder="username"
           radius="xl"
@@ -26,6 +40,7 @@ function Register({}) {
           {...register("username", { required: true })}
         />
         <Input
+          className="smallIcon"
           icon={<IconAsterisk />}
           placeholder="password"
           radius="xl"
